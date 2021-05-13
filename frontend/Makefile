@@ -1,6 +1,5 @@
 CFLAGS = -std=c++17 -I. -I$(VULKAN_SDK)/include
 LDFLAGS = -L$(VULKAN_SDK)/lib `pkg-config --static --libs glfw3` -lvulkan
-IMGUIDIR = imgui
 IMGUIFILES = $(shell find $(IMGUIDIR) -name '*.cpp')
 IMGUIOBJS = $(shell find $(IMGUIDIR) -name '*.o')
 
@@ -13,7 +12,7 @@ fragObjFiles = $(patsubst %.frag, %.frag.spv, $(fragSources))
 TARGET = a.out
 $(TARGET): $(vertObjFiles) $(fragObjFiles)
 $(TARGET): *.cpp *.hpp
-	g++ $(CFLAGS) -o $(TARGET) *.cpp $(LDFLAGS) $(IMGUIOBJS)
+	g++ $(CFLAGS) -o $(TARGET) *.cpp $(LDFLAGS) 
 
 # make shader targets
 %.spv: %
@@ -23,9 +22,6 @@ imgui:
 	g++ -c $(IMGUIFILES) $(CFLAGS) $(LDFLAGS)
 	mv imgui*.o $(IMGUIDIR)
 	g++ $(CFLAGS) -o imgui.out imgui_test.cpp $(LDFLAGS) $(IMGUIOBJS)
-
-%.o:%.cpp
-	g++ -c (%%).cpp -o (%%).o
 
 tv.out: tv.c
 	gcc  -I$(VULKAN_SDK)/include -o tv.out tv.c $(LDFLAGS) -std=c17
