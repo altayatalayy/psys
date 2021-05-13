@@ -1,14 +1,10 @@
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include "first_app.hpp"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
+// std
+#include <cstdlib>
 #include <iostream>
-#include <vulkan/vulkan.h>
+#include <stdexcept>
 
 #include "imgui/imgui.h"
 
@@ -38,10 +34,15 @@ int main() {
 	}
 
 	glfwDestroyWindow(window);
+  lve::FirstApp app{};
 
-	glfwTerminate();
-
-	return 0;
+  try {
+    app.run();
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
+    return EXIT_FAILURE;
+  }
+	return EXIT_SUCCESS;
 }
 
 void keyCallBack(GLFWwindow *win, int key, int scancode, int action, int mods){
