@@ -14,8 +14,8 @@
 namespace lve {
 
 struct SimplePushConstantData {
-  glm::mat2 transform{1.f};
-  glm::vec2 offset;
+  alignas(16) glm::mat3 transform{1.f};
+  alignas(16) glm::vec3 offset;
   alignas(16) glm::vec3 color;
 };
 
@@ -39,9 +39,9 @@ void FirstApp::run() {
 
 void FirstApp::loadGameObjects() {
   std::vector<LveModel::Vertex> vertices{
-      {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+      {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+      {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+      {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
   auto lveModel = std::make_shared<LveModel>(lveDevice, vertices);
     
   // https://www.color-hex.com/color-palette/5361
@@ -58,7 +58,7 @@ void FirstApp::loadGameObjects() {
   for (int i = 0; i < 40; i++) {
     auto triangle = LveGameObject::createGameObject();
     triangle.model = lveModel;
-    triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
+    triangle.transform2d.scale = glm::vec3(.5f) + i * 0.025f;
     triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
     triangle.color = colors[i % colors.size()];
     gameObjects.push_back(std::move(triangle));
@@ -191,8 +191,8 @@ void FirstApp::renderGameObjects(VkCommandBuffer commandBuffer) {
   int i = 0;
   for (auto& obj : gameObjects) {
     i += 1;
-    obj.transform2d.rotation =
-        glm::mod<float>(obj.transform2d.rotation + 0.001f * i, 2.f * glm::pi<float>());
+   obj.transform2d.rotation =
+       glm::mod<float>(obj.transform2d.rotation + 0.001f * i, 2.f * glm::pi<float>());
   }
  
   // render
@@ -201,7 +201,7 @@ void FirstApp::renderGameObjects(VkCommandBuffer commandBuffer) {
     SimplePushConstantData push{};
     push.offset = obj.transform2d.translation;
     push.color = obj.color;
-    push.transform = obj.transform2d.mat2();
+    push.transform = obj.transform2d.mat3();
  
     vkCmdPushConstants(
         commandBuffer,

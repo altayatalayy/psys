@@ -8,16 +8,16 @@
 namespace lve {
 
 struct Transform2dComponent {
-  glm::vec2 translation{};  // (position offset)
-  glm::vec2 scale{1.f, 1.f};
+  glm::vec3 translation{};  // (position offset)
+  glm::vec3 scale{1.f, 1.f,1.f};
   float rotation;
 
-  glm::mat2 mat2() {
+  glm::mat3 mat3() {
     const float s = glm::sin(rotation);
     const float c = glm::cos(rotation);
-    glm::mat2 rotMatrix{{c, s}, {-s, c}};
+    glm::mat3 rotMatrix{{c,s,.0f}, {-s,c,.0f}, {.0f,.0f,1.f}};
 
-    glm::mat2 scaleMat{{scale.x, .0f}, {.0f, scale.y}};
+    glm::mat3 scaleMat{{scale.x, .0f, .0f}, {.0f, scale.y,.0f},{.0f, .0f, scale.z}};
     return rotMatrix * scaleMat;
   }
 };
