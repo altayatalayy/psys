@@ -3,7 +3,7 @@
 
 #include "psys.hpp"
 
-const int n = 13;
+const int n = 100000;
 const double dt = 0.01;
 
 particleSystem ps;
@@ -22,6 +22,7 @@ void init_particle_system(particleSystem& ps, const unsigned int n) {
 int main(int, char** argv){
 	
 	init_particle_system(ps, n);
+	ps.update(dt);
 
     return 0;
 }

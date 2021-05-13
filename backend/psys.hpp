@@ -68,6 +68,7 @@ private:
 
 public:
 	particle(const position_t& position, double mass, double radius);
+	particle(const particle& other) noexcept;
 	particle(particle&& other) noexcept;
 	unsigned int register_force(const force_t& force);
 	void update_force(const force_t& force, unsigned int idx);
@@ -100,6 +101,7 @@ public:
 
 class particleSystem {
 private:
+	double sim_time;
 	force_t* wind;
 	unsigned int wind_idx;
 	std::vector<particle> _particles;
@@ -107,10 +109,15 @@ private:
 	unsigned int n_worker = 4;
 	std::vector<std::thread> _workers;
 	void wait_all(void);
+	bool is_running;
+	const double _dt;
 
 public:
 	particleSystem();
 	//particleSystem(particleSystem&& other);
 	void add_particles(std::vector<particle>& particles);
 	void update(double dt);
+	void run(void);
+	void stop(void);
+	double get_sim_time(void) const;
 };

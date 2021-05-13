@@ -125,6 +125,17 @@ particle::particle(particle&& other) noexcept{
 	is_fixed = other.is_fixed;
 }
 
+particle::particle(const particle& other) noexcept{
+	_position = other._position;
+	_mass = other._mass;
+	_radius = other._radius;
+	_velocity = other._velocity;
+	_accel = other._accel;
+	_forces = other._forces;
+	is_fixed = other.is_fixed;
+
+}
+
 unsigned int particle::register_force(const force_t& force) {
 	_forces.push_back(force);
 	return _forces.size()-1;
@@ -231,7 +242,7 @@ void springdamper::update(void) {
 
 
 //Particle system
-particleSystem::particleSystem() {
+particleSystem::particleSystem() : sim_time(0.0f), is_running(false), _dt(0.01){
 	wind = new force_t(1, 0, 0);
 	wind_idx = 1;
 	_workers.reserve(n_worker);
@@ -251,16 +262,39 @@ void particleSystem::add_particles(std::vector<particle>& particles) {
 
 
 void particleSystem::update(double dt) {
+	sim_time += dt;
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	for (int i = 0; i < _particles.size(); i++) {
-		_particles[i].update(dt);
-		if (i != 0) {
-			_spdampers[i-1].update();
-		}
-		
+	for (particle& p : _particles) {
+		p.update(dt);
+	}
+	for(springdamper& sd : _spdampers){	
+			sd.update();
 	}
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	//std::cout << "Time Elapsed = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0 << "[s]" << std::endl;
+	double frame_time =  std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0;
+}
+
+double particleSystem::get_sim_time(void) const{
+	return sim_time;	
+}
+
+void particleSystem::run(void){
+	is_running = true;
+	std::thread t([&]{
+			while(this->is_running){
+				this->update(this->_dt);
+			}
+		}
+	);
+	_workers.push_back(std::move(t));
+
+}
+
+void particleSystem::stop(void){
+	if(is_running){
+		is_running = false;
+		_workers[0].join();
+	}
 }
 
 
